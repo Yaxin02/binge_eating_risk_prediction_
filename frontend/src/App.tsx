@@ -1,5 +1,6 @@
 import "./App.css";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 type FormData = {
   age: number;
@@ -18,9 +19,12 @@ type FormData = {
 type PredictionResponse = {
   prediction: number;
   probability: number;
+  saved?: boolean;
 };
 
 function App() {
+  const navigate = useNavigate();
+
   const [form, setForm] = useState<FormData>({
     age: 0,
     gender: 0,
@@ -39,6 +43,8 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+ const API_BASE = "http://127.0.0.1:8000";
+
   const handleChange = (field: keyof FormData, value: number) => {
     setForm((prev) => ({
       ...prev,
@@ -52,7 +58,7 @@ function App() {
       setError("");
       setResult(null);
 
-      const response = await fetch("http://localhost:8000/predict", {
+      const response = await fetch(`${API_BASE}/predict`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -195,70 +201,9 @@ function App() {
               marginBottom: "26px",
             }}
           >
-            <div
-              style={{
-                background: "#f8fafc",
-                borderRadius: "18px",
-                padding: "16px",
-                border: "1px solid #e2e8f0",
-              }}
-            >
-              <div style={{ color: "#64748b", fontSize: "13px" }}>Model</div>
-              <div
-                style={{
-                  marginTop: "6px",
-                  color: "#0f172a",
-                  fontWeight: 700,
-                  fontSize: "18px",
-                }}
-              >
-                Random Forest
-              </div>
-            </div>
-
-            <div
-              style={{
-                background: "#f8fafc",
-                borderRadius: "18px",
-                padding: "16px",
-                border: "1px solid #e2e8f0",
-              }}
-            >
-              <div style={{ color: "#64748b", fontSize: "13px" }}>Features</div>
-              <div
-                style={{
-                  marginTop: "6px",
-                  color: "#0f172a",
-                  fontWeight: 700,
-                  fontSize: "18px",
-                }}
-              >
-                11 Inputs
-              </div>
-            </div>
-
-            <div
-              style={{
-                background: "#f8fafc",
-                borderRadius: "18px",
-                padding: "16px",
-                border: "1px solid #e2e8f0",
-              }}
-            >
-              <div style={{ color: "#64748b", fontSize: "13px" }}>
-                Project Type
-              </div>
-              <div
-                style={{
-                  marginTop: "6px",
-                  color: "#0f172a",
-                  fontWeight: 700,
-                  fontSize: "18px",
-                }}
-              >
-                Supervised ML
-              </div>
-            </div>
+            <StatCard label="Model" value="Random Forest" />
+            <StatCard label="Features" value="11 Inputs" />
+            <StatCard label="Project Type" value="Supervised ML" />
           </div>
 
           <div
@@ -378,10 +323,7 @@ function App() {
                 style={inputStyle}
                 value={form.sleep_apnea_syndrome}
                 onChange={(e) =>
-                  handleChange(
-                    "sleep_apnea_syndrome",
-                    Number(e.target.value)
-                  )
+                  handleChange("sleep_apnea_syndrome", Number(e.target.value))
                 }
               >
                 <option value={0}>0</option>
@@ -390,9 +332,7 @@ function App() {
             </div>
 
             <div>
-              <label style={labelStyle}>
-                Gastroesophageal Reflux Disease
-              </label>
+              <label style={labelStyle}>Gastroesophageal Reflux Disease</label>
               <select
                 style={inputStyle}
                 value={form.gastroesophageal_reflux_disease}
@@ -417,13 +357,47 @@ function App() {
                 placeholder="e.g. 3.5"
                 value={form.ede_q_per_operation || ""}
                 onChange={(e) =>
-                  handleChange(
-                    "ede_q_per_operation",
-                    Number(e.target.value)
-                  )
+                  handleChange("ede_q_per_operation", Number(e.target.value))
                 }
               />
             </div>
+            </div>
+
+<div
+  style={{
+    marginTop: "14px",
+    padding: "10px 14px",
+    borderRadius: "12px",
+    background: "#f8fafc",
+    border: "1px solid #e2e8f0",
+    fontSize: "14px",
+    color: "#64748b",
+    lineHeight: 1.6,
+  }}
+>
+  To know your EDE-Q Score,{" "}
+  <a
+    href="https://eqe-q-score.onrender.com/"
+    target="_blank"
+    rel="noopener noreferrer"
+    style={{
+      color: "#2563eb",
+      fontWeight: 700,
+      textDecoration: "none",
+    }}
+  >
+    click here
+  </a>
+</div>
+
+<div
+  style={{
+    display: "flex",
+    gap: "12px",
+    marginTop: "26px",
+    flexWrap: "wrap",
+  }}
+>
           </div>
 
           <div
@@ -437,57 +411,36 @@ function App() {
             <button
               onClick={handleSubmit}
               disabled={loading}
-              style={{
-                flex: 1,
-                minWidth: "180px",
-                padding: "14px 18px",
-                borderRadius: "14px",
-                border: "none",
-                fontWeight: 700,
-                fontSize: "16px",
-                color: "white",
-                background:
-                  "linear-gradient(135deg, #2563eb 0%, #7c3aed 100%)",
-                cursor: "pointer",
-                boxShadow: "0 12px 30px rgba(37, 99, 235, 0.28)",
-              }}
+              style={primaryBtn}
             >
               {loading ? "Predicting..." : "Predict Risk"}
             </button>
 
-            <button
-              onClick={handleReset}
-              type="button"
-              style={{
-                padding: "14px 18px",
-                borderRadius: "14px",
-                border: "1px solid #d1d5db",
-                fontWeight: 700,
-                fontSize: "16px",
-                color: "#0f172a",
-                background: "white",
-                cursor: "pointer",
-              }}
-            >
+            <button onClick={handleReset} type="button" style={secondaryBtn}>
               Reset
             </button>
           </div>
 
-          {error && (
-            <div
-              style={{
-                marginTop: "18px",
-                padding: "14px 16px",
-                background: "#fef2f2",
-                border: "1px solid #fecaca",
-                borderRadius: "14px",
-                color: "#b91c1c",
-                fontWeight: 500,
-              }}
+          <div style={{ marginTop: "12px" }}>
+            <button
+              onClick={() => navigate("/records")}
+              type="button"
+              style={{ ...secondaryBtn, width: "100%" }}
             >
-              {error}
-            </div>
-          )}
+              View Records
+            </button>
+          </div>
+          <div style={{ marginTop: "12px" }}>
+  <button
+    onClick={() => navigate("/admin-login")}
+    type="button"
+    style={{ ...secondaryBtn, width: "100%" }}
+  >
+    Admin Login
+  </button>
+</div>
+
+          {error && <ErrorBox message={error} />}
         </div>
 
         <div
@@ -521,39 +474,10 @@ function App() {
             </p>
 
             {!result && !loading && !error && (
-              <div
-                style={{
-                  marginTop: "20px",
-                  padding: "22px",
-                  borderRadius: "18px",
-                  border: "1px dashed #cbd5e1",
-                  background: "#f8fafc",
-                  color: "#64748b",
-                  textAlign: "center",
-                  lineHeight: 1.8,
-                }}
-              >
-                Fill the form and click <strong>Predict Risk</strong> to see the
-                model output.
-              </div>
+              <Placeholder text="Fill the form and click Predict Risk to see the model output." />
             )}
 
-            {loading && (
-              <div
-                style={{
-                  marginTop: "20px",
-                  padding: "22px",
-                  borderRadius: "18px",
-                  background: "#eff6ff",
-                  border: "1px solid #bfdbfe",
-                  color: "#1d4ed8",
-                  fontWeight: 600,
-                  textAlign: "center",
-                }}
-              >
-                Predicting patient outcome...
-              </div>
-            )}
+            {loading && <InfoBox text="Predicting patient outcome..." />}
 
             {result && (
               <div
@@ -571,13 +495,7 @@ function App() {
                       : "1px solid #86efac",
                 }}
               >
-                <div
-                  style={{
-                    fontSize: "14px",
-                    color: "#64748b",
-                    marginBottom: "8px",
-                  }}
-                >
+                <div style={{ fontSize: "14px", color: "#64748b", marginBottom: "8px" }}>
                   Predicted Status
                 </div>
 
@@ -601,50 +519,28 @@ function App() {
                     gap: "12px",
                   }}
                 >
-                  <div
-                    style={{
-                      background: "rgba(255,255,255,0.7)",
-                      padding: "14px",
-                      borderRadius: "14px",
-                    }}
-                  >
-                    <div style={{ fontSize: "13px", color: "#64748b" }}>
-                      Prediction Code
-                    </div>
-                    <div
-                      style={{
-                        marginTop: "6px",
-                        fontSize: "22px",
-                        fontWeight: 800,
-                        color: "#0f172a",
-                      }}
-                    >
-                      {result.prediction}
-                    </div>
-                  </div>
-
-                  <div
-                    style={{
-                      background: "rgba(255,255,255,0.7)",
-                      padding: "14px",
-                      borderRadius: "14px",
-                    }}
-                  >
-                    <div style={{ fontSize: "13px", color: "#64748b" }}>
-                      Confidence
-                    </div>
-                    <div
-                      style={{
-                        marginTop: "6px",
-                        fontSize: "22px",
-                        fontWeight: 800,
-                        color: "#0f172a",
-                      }}
-                    >
-                      {(result.probability * 100).toFixed(2)}%
-                    </div>
-                  </div>
+                  <MiniCard title="Prediction Code" value={String(result.prediction)} />
+                  <MiniCard
+                    title="Confidence"
+                    value={`${(result.probability * 100).toFixed(2)}%`}
+                  />
                 </div>
+
+                {result.saved && (
+                  <div
+                    style={{
+                      marginTop: "14px",
+                      padding: "12px 14px",
+                      borderRadius: "12px",
+                      background: "rgba(255,255,255,0.75)",
+                      color: "#166534",
+                      fontWeight: 700,
+                      textAlign: "center",
+                    }}
+                  >
+                    Saved to database successfully.
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -679,5 +575,135 @@ function App() {
     </div>
   );
 }
+
+function StatCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div
+      style={{
+        background: "#f8fafc",
+        borderRadius: "18px",
+        padding: "16px",
+        border: "1px solid #e2e8f0",
+      }}
+    >
+      <div style={{ color: "#64748b", fontSize: "13px" }}>{label}</div>
+      <div
+        style={{
+          marginTop: "6px",
+          color: "#0f172a",
+          fontWeight: 700,
+          fontSize: "18px",
+        }}
+      >
+        {value}
+      </div>
+    </div>
+  );
+}
+
+function MiniCard({ title, value }: { title: string; value: string }) {
+  return (
+    <div
+      style={{
+        background: "rgba(255,255,255,0.7)",
+        padding: "14px",
+        borderRadius: "14px",
+      }}
+    >
+      <div style={{ fontSize: "13px", color: "#64748b" }}>{title}</div>
+      <div
+        style={{
+          marginTop: "6px",
+          fontSize: "22px",
+          fontWeight: 800,
+          color: "#0f172a",
+        }}
+      >
+        {value}
+      </div>
+    </div>
+  );
+}
+
+function Placeholder({ text }: { text: string }) {
+  return (
+    <div
+      style={{
+        marginTop: "20px",
+        padding: "22px",
+        borderRadius: "18px",
+        border: "1px dashed #cbd5e1",
+        background: "#f8fafc",
+        color: "#64748b",
+        textAlign: "center",
+        lineHeight: 1.8,
+      }}
+    >
+      {text}
+    </div>
+  );
+}
+
+function InfoBox({ text }: { text: string }) {
+  return (
+    <div
+      style={{
+        marginTop: "20px",
+        padding: "22px",
+        borderRadius: "18px",
+        background: "#eff6ff",
+        border: "1px solid #bfdbfe",
+        color: "#1d4ed8",
+        fontWeight: 600,
+        textAlign: "center",
+      }}
+    >
+      {text}
+    </div>
+  );
+}
+
+function ErrorBox({ message }: { message: string }) {
+  return (
+    <div
+      style={{
+        marginTop: "18px",
+        padding: "14px 16px",
+        background: "#fef2f2",
+        border: "1px solid #fecaca",
+        borderRadius: "14px",
+        color: "#b91c1c",
+        fontWeight: 500,
+      }}
+    >
+      {message}
+    </div>
+  );
+}
+
+const primaryBtn: React.CSSProperties = {
+  flex: 1,
+  minWidth: "180px",
+  padding: "14px 18px",
+  borderRadius: "14px",
+  border: "none",
+  fontWeight: 700,
+  fontSize: "16px",
+  color: "white",
+  background: "linear-gradient(135deg, #2563eb 0%, #7c3aed 100%)",
+  cursor: "pointer",
+  boxShadow: "0 12px 30px rgba(37, 99, 235, 0.28)",
+};
+
+const secondaryBtn: React.CSSProperties = {
+  padding: "14px 18px",
+  borderRadius: "14px",
+  border: "1px solid #d1d5db",
+  fontWeight: 700,
+  fontSize: "16px",
+  color: "#0f172a",
+  background: "white",
+  cursor: "pointer",
+};
 
 export default App;
