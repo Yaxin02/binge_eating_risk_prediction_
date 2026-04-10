@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { databases, APPWRITE_DATABASE_ID, APPWRITE_COLLECTION_ID } from "./appwrite";
+import { Query } from "appwrite";
 
 type RecordItem = {
   id: number;
@@ -25,27 +27,44 @@ function RecordsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const API_BASE = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-
   const fetchRecords = async () => {
     setLoading(true);
     setError("");
 
     try {
-      const response = await fetch(`${API_BASE}/records`);
+      const response = await databases.listDocuments(
+         APPWRITE_DATABASE_ID,
+         APPWRITE_COLLECTION_ID,
+         [Query.orderDesc("created_at")]
+      );
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-
-      const data: RecordItem[] = await response.json();
+      const data = response.documents.map(doc => ({
+        id: doc.$id,
+        ...doc
+      })) as unknown as RecordItem[];
+      
       setRecords(data);
     } catch (err) {
       console.error("Records fetch error:", err);
-      setError("Could not load saved records from backend.");
+      setError("Could not load saved records from Appwrite Database.");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDownloadCSV = () => {
+    if (records.length === 0) return;
+    const headers = ["Age","Gender","BMI","Weight_kg","Waist_cm","Education","Alcohol","T2D","Sleep_Apnea","GERD","EDEQ","Prediction","Probability","Created_At"];
+    const csvRows = [headers.join(",")];
+    records.forEach(r => {
+      csvRows.push(`${r.age},${r.gender},${r.bmi},${r.weight_kg},${r.waist_cm},${r.education},${r.alcohol},${r.t2d},${r.sleep_apnea_syndrome},${r.gastroesophageal_reflux_disease},${r.ede_q_per_operation},${r.prediction},${r.probability},${r.created_at}`);
+    });
+    const blob = new Blob([csvRows.join("\\n")], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "binge_records.csv";
+    a.click();
   };
 
   useEffect(() => {
@@ -126,18 +145,12 @@ function RecordsPage() {
               Refresh
             </button>
 
-            <a
-              href="http://127.0.0.1:8000/download-records"
-              style={{
-                ...secondaryBtn,
-                textDecoration: "none",
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
+            <button
+              onClick={handleDownloadCSV}
+              style={secondaryBtn}
             >
               Download CSV
-            </a>
+            </button>
           </div>
 
           {loading && <Box text="Loading records..." />}

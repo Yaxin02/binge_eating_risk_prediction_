@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { databases, APPWRITE_DATABASE_ID, APPWRITE_COLLECTION_ID } from "./appwrite";
+import { Query } from "appwrite";
 
 type RecordItem = {
   id: number;
@@ -15,18 +17,34 @@ function DashboardPage() {
   const [records, setRecords] = useState<RecordItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const API_BASE = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-
   const fetchRecords = async () => {
     try {
-      const response = await fetch(`${API_BASE}/records`);
-      const data = await response.json();
-      setRecords(data);
+      const response = await databases.listDocuments(
+         APPWRITE_DATABASE_ID,
+         APPWRITE_COLLECTION_ID,
+         [Query.orderDesc("created_at"), Query.limit(50)]
+      );
+      setRecords(response.documents as unknown as RecordItem[]);
     } catch (error) {
-      console.error(error);
+      console.error("Appwrite DB Error:", error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDownloadCSV = () => {
+    if (records.length === 0) return;
+    const headers = ["Age","BMI","Prediction","Probability","Created_At"];
+    const csvRows = [headers.join(",")];
+    records.forEach(r => {
+      csvRows.push(`${r.age},${r.bmi},${r.prediction},${r.probability},${r.created_at}`);
+    });
+    const blob = new Blob([csvRows.join("\\n")], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "dashboard_records.csv";
+    a.click();
   };
 
   useEffect(() => {
@@ -173,18 +191,12 @@ function DashboardPage() {
               View Records
             </button>
 
-            <a
-              href="http://127.0.0.1:8000/download-records"
-              style={{
-                ...secondaryBtn,
-                textDecoration: "none",
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
+            <button
+              onClick={handleDownloadCSV}
+              style={secondaryBtn}
             >
               Download CSV
-            </a>
+            </button>
 
             <button
               onClick={() => {

@@ -1,6 +1,7 @@
 import "./App.css";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { functions, databases, ID, APPWRITE_FUNCTION_ID, APPWRITE_DATABASE_ID, APPWRITE_COLLECTION_ID } from "./appwrite";
 
 type FormData = {
   age: number;
@@ -58,24 +59,52 @@ function App() {
       setError("");
       setResult(null);
 
-      const response = await fetch(`${API_BASE}/predict`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(form),
-      });
+      // Execute ML model Cloud Function
+      const response = await functions.createExecution(
+        APPWRITE_FUNCTION_ID,
+        JSON.stringify(form)
+      );
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || "Prediction failed");
+      if (response.responseStatusCode !== 200) {
+        throw new Error(response.responseBody || "Prediction failed");
       }
 
-      const data: PredictionResponse = await response.json();
+      const data: PredictionResponse = JSON.parse(response.responseBody);
+      
+      // Save directly from frontend to Appwrite Database (Replacing Server SQLite)
+      try {
+        await databases.createDocument(
+            APPWRITE_DATABASE_ID, 
+            APPWRITE_COLLECTION_ID, 
+            ID.unique(), 
+            {
+               // Using generic naming convention expected by SDK, or map fields
+               age: form.age,
+               gender: form.gender,
+               bmi: form.bmi,
+               weight_kg: form.weight_kg,
+               waist_cm: form.waist_cm,
+               education: form.education,
+               alcohol: form.alcohol,
+               t2d: form.t2d,
+               sleep_apnea_syndrome: form.sleep_apnea_syndrome,
+               gastroesophageal_reflux_disease: form.gastroesophageal_reflux_disease,
+               ede_q_per_operation: form.ede_q_per_operation,
+               prediction: data.prediction,
+               probability: data.probability,
+               created_at: new Date().toISOString()
+            }
+        );
+        data.saved = true;
+      } catch (dbErr) {
+        console.error("Note: Appwrite Database IDs not configured or document failed.", dbErr);
+        data.saved = false;
+      }
+
       setResult(data);
     } catch (err) {
       console.error(err);
-      setError("Could not connect to the backend or get a prediction.");
+      setError("Could not connect to Appwrite Function or get a prediction.");
     } finally {
       setLoading(false);
     }
