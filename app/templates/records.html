@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EDE-Q Saved Records</title>
+    <link rel="icon" type="image/svg+xml" href="https://github.com/lucide-icons/lucide/raw/refs/heads/main/icons/brain-circuit.svg">
+    <style>
+        :root {
+            --bg-left: #f5f7fc;
+            --bg-right: #eef8fb;
+            --card: rgba(255, 255, 255, 0.82);
+            --border: rgba(209, 218, 235, 0.9);
+            --text: #17233b;
+            --muted: #6c7a96;
+            --badge-bg: #efe7ff;
+            --badge-text: #6c3cf0;
+            --input-bg: #ffffff;
+            --primary-1: #2d6df6;
+            --primary-2: #7b35f0;
+            --shadow: 0 20px 50px rgba(31, 41, 55, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Inter, Arial, sans-serif;
+            color: var(--text);
+            background: linear-gradient(90deg, var(--bg-left) 0%, #f8f5fb 48%, var(--bg-right) 100%);
+        }
+
+        .page {
+            min-height: 100vh;
+            padding: 30px 18px;
+        }
+
+        .layout {
+            max-width: 1180px;
+            margin: 0 auto;
+        }
+
+        .glass-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 26px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+        }
+
+        .main-card {
+            padding: 26px 26px 28px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--badge-bg);
+            color: var(--badge-text);
+            padding: 10px 16px;
+            border-radius: 999px;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .hero-title {
+            margin: 0;
+            font-size: 40px;
+            line-height: 1.05;
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+
+        .hero-desc {
+            max-width: 760px;
+            margin: 18px auto 0;
+            text-align: center;
+            color: var(--muted);
+            font-size: 16px;
+            line-height: 1.8;
+        }
+
+        .top-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin: 24px 0 18px;
+            flex-wrap: wrap;
+        }
+
+        .left-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            border-radius: 16px;
+            padding: 14px 18px;
+            font-size: 15px;
+            font-weight: 800;
+            transition: 0.2s ease;
+        }
+
+        .btn-primary {
+            color: white;
+            border: none;
+            background: linear-gradient(90deg, var(--primary-1), var(--primary-2));
+            box-shadow: 0 14px 28px rgba(87, 84, 232, 0.24);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.9);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .summary {
+            color: var(--muted);
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            background: rgba(255,255,255,0.72);
+        }
+
+        table {
+            width: 100%;
+            min-width: 900px;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            background: rgba(239, 231, 255, 0.7);
+            color: var(--text);
+            font-size: 14px;
+            font-weight: 800;
+            padding: 16px 14px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tbody td {
+            padding: 14px 12px;
+            text-align: center;
+            font-size: 14px;
+            border-bottom: 1px solid rgba(209, 218, 235, 0.7);
+        }
+
+        tbody tr:hover {
+            background: rgba(123, 53, 240, 0.04);
+        }
+
+        .empty-box {
+            margin-top: 10px;
+            border: 1px dashed #cbd5e1;
+            border-radius: 18px;
+            background: rgba(255,255,255,0.45);
+            padding: 28px 18px;
+            color: #64748b;
+            font-size: 17px;
+            line-height: 1.7;
+            text-align: center;
+        }
+
+        .id-pill {
+            display: inline-block;
+            min-width: 34px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: #eef2ff;
+            font-weight: 800;
+        }
+
+        .level-pill {
+            display: inline-block;
+            padding: 7px 12px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .level-low {
+            background: #eaf8ef;
+            color: #1f7a3f;
+        }
+
+        .level-moderate {
+            background: #fff5df;
+            color: #9a6b00;
+        }
+
+        .level-high {
+            background: #fdecec;
+            color: #b42318;
+        }
+
+        @media (max-width: 700px) {
+            .main-card {
+                padding: 20px 16px;
+            }
+
+            .hero-title {
+                font-size: 28px;
+            }
+
+            .top-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .left-actions {
+                width: 100%;
+            }
+
+            .left-actions .btn {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+    <div class="layout">
+        <div class="glass-card main-card">
+
+            <div class="header">
+                <div class="badge">🧠 ML Health Prediction</div>
+                <h1 class="hero-title">EDE-Q Saved Records</h1>
+                <p class="hero-desc">
+                    This table displays all saved submissions from the same EDE-Q scoring application and the same SQLite database.
+                </p>
+            </div>
+
+            <div class="top-actions">
+                <div class="left-actions">
+                    <a class="btn btn-primary" href="/">Back to Calculator</a>
+                    <a class="btn btn-secondary" href="/download-records">Download CSV</a>
+                    <a class="btn btn-secondary" href="/records">Refresh</a>
+                </div>
+                <div class="summary">
+                    Total Records: {{ rows|length }}
+                </div>
+            </div>
+
+            {% if rows %}
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Q1</th>
+                                <th>Q2</th>
+                                <th>Q3</th>
+                                <th>Q4</th>
+                                <th>Q5</th>
+                                <th>Q6</th>
+                                <th>Score</th>
+                                <th>Level</th>
+                                <th>Created At</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in rows %}
+                            <tr>
+                                <td><span class="id-pill">{{ row.id }}</span></td>
+                                <td>{{ row.q1 }}</td>
+                                <td>{{ row.q2 }}</td>
+                                <td>{{ row.q3 }}</td>
+                                <td>{{ row.q4 }}</td>
+                                <td>{{ row.q5 }}</td>
+                                <td>{{ row.q6 }}</td>
+                                <td><strong>{{ row.score }}</strong></td>
+                                <td>
+                                    {% if row.level == 'Low Risk' %}
+                                        <span class="level-pill level-low">{{ row.level }}</span>
+                                    {% elif row.level == 'Moderate Risk' %}
+                                        <span class="level-pill level-moderate">{{ row.level }}</span>
+                                    {% else %}
+                                        <span class="level-pill level-high">{{ row.level }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ row.created_at.strftime('%Y-%m-%d %H:%M') if row.created_at else '' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-box">
+                    No records saved yet. Go back to the calculator, submit the form, and the results will appear here automatically.
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+</body>
+</html>
