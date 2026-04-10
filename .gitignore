@@ -56,3 +56,4 @@ package-lock.json
 *.jpg
 *.jpeg
 *.pdf
+app/predictions.db
