@@ -16,6 +16,6 @@ export const APPWRITE_DATABASE_ID =
   import.meta.env.VITE_APPWRITE_DATABASE_ID || "binge_db";
 export const APPWRITE_COLLECTION_ID =
   import.meta.env.VITE_APPWRITE_COLLECTION_ID || "patients";
-/** Must match the function $id in appwrite.json (or your console function ID). */
+/** Set VITE_APPWRITE_FUNCTION_ID on the host, or run `appwrite pull functions` and commit appwrite.config.json. */
 export const APPWRITE_FUNCTION_ID =
   import.meta.env.VITE_APPWRITE_FUNCTION_ID || "predict";
