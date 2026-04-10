@@ -13,8 +13,8 @@ from flask import (
 )
 from dotenv import load_dotenv
 
-from database import db
-from models import EDEQSubmission
+from .database import db
+from .models import EDEQSubmission
 
 load_dotenv()
 
